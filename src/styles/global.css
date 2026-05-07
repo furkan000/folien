@@ -1,0 +1,423 @@
+:root {
+  /* Color tokens */
+  --primary: #0A3D5C;
+  --primary-dark: #062A40;
+  --primary-light: #1A5577;
+  --primary-soft: #E5EDF2;
+
+  --accent-gold: #C9A961;
+  --accent-gold-soft: #F4EDD9;
+
+  --fakt: #2D8659;
+  --fakt-soft: #E1F0E8;
+  --mythos: #B84A39;
+  --mythos-soft: #F5E3DF;
+
+  --bg: #FBFAF7;
+  --bg-alt: #F1EDE5;
+  --surface: #FFFFFF;
+
+  --text: #1A1A1A;
+  --text-muted: #5C5C5C;
+  --text-subtle: #8A8A8A;
+
+  --border: #D9D2C5;
+  --border-soft: #EAE4D6;
+
+  /* Typography */
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Spacing scale */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--text);
+  background: #2A2A28;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "ss01", "cv11";
+}
+
+/* === Stage that scales the slide to viewport keeping 16:9 === */
+.stage {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(ellipse at top, #34342f 0%, #1F1F1D 70%);
+}
+
+.slide-frame {
+  width: min(96vw, calc(96vh * 16 / 9));
+  aspect-ratio: 16 / 9;
+  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    0 30px 80px -20px rgba(0,0,0,0.5),
+    0 10px 30px -10px rgba(0,0,0,0.3);
+  border-radius: 6px;
+}
+
+/* Internal slide canvas — uses fixed virtual dimensions for predictable layout */
+.slide-canvas {
+  position: absolute;
+  inset: 0;
+  width: 1600px;
+  height: 900px;
+  transform-origin: top left;
+  font-size: 16px;
+}
+
+/* === Generic slide layout === */
+.slide {
+  width: 100%;
+  height: 100%;
+  padding: 64px 88px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: var(--bg);
+}
+
+.slide-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 32px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.slide-eyebrow {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+.slide-eyebrow .num {
+  font-family: var(--font-mono);
+  color: var(--accent-gold);
+  margin-right: 12px;
+}
+
+.slide-meta {
+  font-size: 13px;
+  color: var(--text-subtle);
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
+}
+
+.slide-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 56px;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--primary-dark);
+  margin-bottom: 8px;
+}
+
+.slide-subtitle {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 22px;
+  color: var(--text-muted);
+  line-height: 1.4;
+  margin-bottom: 32px;
+}
+
+.slide-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.slide-footer {
+  position: absolute;
+  bottom: 28px;
+  left: 88px;
+  right: 88px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--text-subtle);
+  letter-spacing: 0.08em;
+}
+
+.slide-footer .brand {
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.slide-footer .pagenum {
+  font-family: var(--font-mono);
+}
+
+/* === Navigation === */
+.nav {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 100px;
+  padding: 8px 16px;
+  z-index: 100;
+  opacity: 0.4;
+  transition: opacity 0.2s ease;
+}
+.nav:hover { opacity: 1; }
+
+.nav button {
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.85);
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 18px;
+  transition: background 0.15s;
+}
+.nav button:hover { background: rgba(255,255,255,0.1); }
+.nav button:disabled { opacity: 0.3; cursor: default; }
+
+.nav .indicator {
+  font-family: var(--font-mono);
+  color: rgba(255,255,255,0.85);
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  min-width: 60px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: var(--accent-gold);
+  z-index: 200;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* === Reusable components === */
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.tag-mythos { background: var(--mythos-soft); color: var(--mythos); }
+.tag-fakt { background: var(--fakt-soft); color: var(--fakt); }
+.tag-primary { background: var(--primary-soft); color: var(--primary); }
+.tag-gold { background: var(--accent-gold-soft); color: #8C7339; }
+
+.callout {
+  border-left: 3px solid var(--accent-gold);
+  padding: 12px 18px;
+  background: var(--accent-gold-soft);
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--text);
+  border-radius: 2px;
+}
+
+.kpi {
+  font-family: var(--font-display);
+  font-size: 96px;
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  color: var(--primary);
+}
+
+.kpi-label {
+  font-size: 14px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-top: 8px;
+}
+
+.bullet-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  list-style: none;
+}
+
+.bullet-list li {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  font-size: 17px;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.bullet-list li::before {
+  content: '';
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  background: var(--accent-gold);
+  border-radius: 50%;
+  margin-top: 11px;
+}
+
+.cite {
+  font-size: 12px;
+  color: var(--text-subtle);
+  font-style: italic;
+}
+
+/* Two-column layouts */
+.cols-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  flex: 1;
+}
+
+.cols-2-narrow-wide {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 40px;
+  flex: 1;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: 8px;
+  padding: 24px 28px;
+}
+
+.card-mythos {
+  background: var(--mythos-soft);
+  border-left: 4px solid var(--mythos);
+  border-radius: 4px;
+  padding: 24px 28px;
+}
+
+.card-fakt {
+  background: var(--fakt-soft);
+  border-left: 4px solid var(--fakt);
+  border-radius: 4px;
+  padding: 24px 28px;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.card-mythos .card-header { color: var(--mythos); }
+.card-fakt .card-header { color: var(--fakt); }
+
+.card-body {
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--text);
+}
+
+/* Tables */
+.evidence-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.evidence-table th {
+  text-align: left;
+  padding: 10px 12px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 600;
+  border-bottom: 2px solid var(--primary);
+  background: var(--bg-alt);
+}
+.evidence-table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--border-soft);
+  vertical-align: top;
+  line-height: 1.4;
+}
+.evidence-table tr:nth-child(even) td { background: rgba(241, 237, 229, 0.3); }
+
+.evidence-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.ev-strong { background: var(--fakt); color: white; }
+.ev-mod { background: var(--accent-gold); color: white; }
+.ev-weak { background: #B0A990; color: white; }
+
+/* Print */
+@media print {
+  body { background: white; }
+  .nav, .progress { display: none; }
+  .slide-frame { box-shadow: none; }
+  .stage { position: static; }
+}
